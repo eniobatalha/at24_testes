@@ -1,217 +1,225 @@
-SELECT 
+SELECT DISTINCT 
+REG,
+nome,
+NomeMae,
+INDIGENTE,
+dt_nasciemento,
+cpf,
+cns,
+prontuario,
+num_atend,
+dt_entrada,
+dt_entr_cls,
+dt_saida_cls,
+CASE 
+WHEN DT_ENTR_CLS = DT_ATEND THEN DT_SAIDA
+ELSE DT_ATEND
+END AS DT_ATEND,
+DT_Saida,
+datainicio,
+datafim,
+CASE 
+WHEN SUBSTR(dt_entrada,1,10) <= SUBSTR (DataSolicitacaoVaga,1,10)   THEN dt_transferencia
+ELSE ''
+END AS dt_transferencia,
+CASE 
+WHEN SUBSTR(dt_entrada,1,10) <= SUBSTR (DataSolicitacaoVaga,1,10)   THEN DataSolicitacaoVaga
+ELSE ''
+END AS DataSolicitacaoVaga,
+DataObito,
+cep,  
+cidade,
+bairro,           
+estado,
+CORID,
+OBITO,
+CausaObito,
+DIAGNOSTICO,
+destino,
+CODMETA,
+TipoUrgenciaID,
+ESPECAIDADECOD,
+ESPECIALIDADEDESCRICAO,
+OrigemPaciente,
+CID
+
+FROM (
+SELECT               
 DISTINCT 
 'AT24' AS REG, 
 q5.pac_nome AS nome, 
 CASE 
 WHEN q5.pac_nome_mae IS NOT NULL then q5.pac_nome_mae
-WHEN q5.pac_nome_mae IS NULL then 'SEM INFORMACAO'
-ELSE NULL
-END NomeMae,
-
+WHEN q5.pac_nome_mae IS NULL then 'NAO INFORMADO'
+END as NomeMae,
 CASE
-WHEN q5.pac_nome = '%IDENTIFICA%' then 'S'
+	WHEN q5.pac_nome = '%IDENTIFICA%' then 'S'
 ELSE 'N' 
-END INDIGENTE,
-date(q5.pac_nasc) AS dt_nasciemnto, 
+END as INDIGENTE,
+date(q5.pac_nasc) AS dt_nasciemento, 
 q5.pac_numcpf AS cpf, 
 q5.pac_cartao_sus AS cns,
 q5.pac_reg AS prontuario, 
-
 CASE 
 	WHEN q1.rcl_hsp IS NOT NULL THEN q1.rcl_hsp	
-	WHEN q1.rcl_hsp IS NULL THEN q5.pac_reg
-	ELSE NULL
+	WHEN q1.rcl_hsp IS NULL THEN 0
 END num_atend,
-
-
-CASE 
-	WHEN q6.fle_dthr_chegada IS NOT NULL THEN CONCAT(''&SUBSTR(q6.fle_dthr_chegada,9,2)&'/'&SUBSTR(q6.fle_dthr_chegada,6,2)&'/'&SUBSTR(q6.fle_dthr_chegada,1,4)&' '&SUBSTR(q6.fle_dthr_chegada,11,9),'') 
-	WHEN q6.fle_dthr_chegada IS NULL THEN CONCAT(''&SUBSTR(q1.rcl_dthr,9,2)&'/'&SUBSTR(q1.rcl_dthr,6,2)&'/'&SUBSTR(q1.rcl_dthr,1,4)&' '&SUBSTR(q1.rcl_dthr,11,9),'') 
-	ELSE NULL
-END dt_entrada,
-
-CASE 
-	WHEN q6.fle_dthr_atendimento IS NULL THEN CONCAT(''&SUBSTR(q2.rcl_dthr,9,2)&'/'&SUBSTR(q2.rcl_dthr,6,2)&'/'&SUBSTR(q2.rcl_dthr,1,4)&' '&SUBSTR(q2.rcl_dthr,11,9),'')
-	ELSE CONCAT(''&SUBSTR(q6.fle_dthr_atendimento,9,2)&'/'&SUBSTR(q6.fle_dthr_atendimento,6,2)&'/'&SUBSTR(q6.fle_dthr_atendimento,1,4)&' '&SUBSTR(q6.fle_dthr_atendimento,11,9),'') 
-END AS DT_CLS,
-
-
-CASE 
-	WHEN q6.fle_dthr_atendimento IS NULL THEN CONCAT(''&SUBSTR(q2.rcl_dthr_lib,9,2)&'/'&SUBSTR(q2.rcl_dthr_lib,6,2)&'/'&SUBSTR(q2.rcl_dthr_lib,1,4)&' '&SUBSTR(q2.rcl_dthr_lib,11,9),'')
-	ELSE CONCAT(''&SUBSTR(q6.fle_dthr_atendimento,9,2)&'/'&SUBSTR(q6.fle_dthr_atendimento,6,2)&'/'&SUBSTR(q6.fle_dthr_atendimento,1,4)&' '&SUBSTR(q6.fle_dthr_atendimento,11,9),'') 
-END AS SAIDA_CLS,
-
-CASE 
-	WHEN q1.rcl_cod = '060096' THEN CONCAT(''&SUBSTR(q1.rcl_dthr_lib,9,2)&'/'&SUBSTR(q1.rcl_dthr_lib,6,2)&'/'&SUBSTR(q1.rcl_dthr_lib,1,4)&' '&SUBSTR(q1.rcl_dthr_lib,11,9),'')
-	ELSE CONCAT(''&SUBSTR(q1.rcl_dthr,9,2)&'/'&SUBSTR(q1.rcl_dthr,6,2)&'/'&SUBSTR(q1.rcl_dthr,1,4)&' '&SUBSTR(q1.rcl_dthr,11,9),'')
-	END AS DT_ATEND, 
-
-CASE 
-	WHEN q1.rcl_cod = '060096' THEN CONCAT(''&SUBSTR(q1.rcl_dthr_lib,9,2)&'/'&SUBSTR(q1.rcl_dthr_lib,6,2)&'/'&SUBSTR(q1.rcl_dthr_lib,1,4)&' '&SUBSTR(q1.rcl_dthr_lib,11,9),'')
-	ELSE CONCAT(''&SUBSTR(q1.rcl_dthr_lib,9,2)&'/'&SUBSTR(q1.rcl_dthr_lib,6,2)&'/'&SUBSTR(q1.rcl_dthr_lib,1,4)&' '&SUBSTR(q1.rcl_dthr_lib,11,9),'')
-END AS DT_Saida, 
-
-'01/12/2023' datainicio, 
-'31/12/2023' datafim,
-SUBSTR (q3.dt_transfrencia,1,19) AS dt_transfrencia, 
-SUBSTR (q3.dt_solicit_transf,1,19) AS DATASOLICITACAOTRANSFERENCIA,
-q5.pac_cep AS cep, 
-q5.pac_cid AS cidade, 
-
-
-CASE
-WHEN q5.pac_cid ='1814'	THEN	'JABOATAO DOS GUARARAPES'
-WHEN q5.pac_cid ='14'	THEN	'RECIFE'
-WHEN q5.pac_cid ='1967'	THEN	'MORENO'
-WHEN q5.pac_cid ='1236'	THEN	'CABO DE SANTO AGOSTINHO'
-WHEN q5.pac_cid ='1300'	THEN	'CAMARAGIBE'
-ELSE ''
-END cidade,
-
-q5.pac_comp AS bairro, 
-
-
-CASE
-	WHEN q5.pac_comp  =	'28'	THEN	'ALTO SOL NASCENTE'
-	WHEN q5.pac_comp  =	'273'	THEN	'RENDEIRA'
-	ELSE NULL
-END bairro,
-
+ q6.fle_dthr_chegada as dt_entrada, 
+ Case 
+ when q2.rcl_dthr < q6.fle_dthr_chegada  THEN 'SEM-CLAS'
+ ELSE SUBSTR (q2.rcl_dthr,1,19)
+ END AS dt_entr_cls, 
+ CASE
+ when q2.rcl_dthr < q6.fle_dthr_chegada  THEN 'SEM-CLAS'
+ ELSE SUBSTR (q2.rcl_dthr_lib,1,19)
+ END AS dt_saida_cls, 
+ CASE 
+ WHEN q6.fle_dthr_atendimento < q2.rcl_dthr THEN SUBSTR(q1.rcl_dthr,1,19)
+ ELSE SUBSTR(q6.fle_dthr_atendimento,1,19)
+ END AS DT_ATEND, 
+SUBSTR (q1.rcl_dthr_lib,1,19) AS DT_Saida,
+'01/08/2023'as datainicio, 
+'31/08/2023' AS datafim,
+CONCAT(SUBSTR (q3.dt_transfrencia,1,16), ':00') AS dt_transferencia,
+CONCAT(SUBSTR (q3.dt_solicit_transf,1,16), ':00') AS DataSolicitacaoVaga,
+CONCAT(SUBSTR (q4.data_OBITO,1,16), ':00') AS DataObito,
+q5.pac_cep AS cep,  
+q5.pac_cid AS cidade,
+q5.pac_comp AS bairro,           
 q5.pac_uf AS estado,
-
 CASE 
- 	 WHEN q5.PDC_COR = 'A' THEN '1' 
+ 	 WHEN q5.PDC_COR = 'A' THEN '1'
  	 WHEN q5.PDC_COR = 'B' THEN '2'
  	 WHEN q5.PDC_COR = 'I' THEN '3' 
- 	 WHEN q5.PDC_COR = 'P' THEN '5' 
- 	 WHEN q5.PDC_COR = 'N' THEN '4' 
- 	 ELSE NULL
-END CORID,
-
+ 	 WHEN q5.PDC_COR = 'P' THEN '4' 
+ 	 WHEN q5.PDC_COR = 'N' THEN '5' 
+END AS CORID,
 
 CASE 
 	WHEN q4.rcl_cod = 'REGOBITO' then 'true'
 	ELSE 'false' 
-END OBITO,
-
+END as OBITO,
 CASE
 	WHEN q4.rcl_cod = 'REGOBITO' THEN q4.Causa_Obito
-	ELSE NULL
-	END CausaObito,
-
+	END AS CausaObito,
 CASE 	
 	WHEN q4.rcl_cod = 'REGOBITO' THEN q4.data_OBITO 
-	ELSE NULL
-END DataObito,
-'' DIAGNOSTICO,
-q3.DESTINO,
+END as DataObito,
+'' AS DIAGNOSTICO,
+q3.DESTINO AS destino,
+CASE 
+	WHEN Q1.rcl_cod = 'SC' THEN '33269'
+	WHEN Q1.rcl_cod = '10025' THEN '33196'
+	WHEN Q1.rcl_cod = '10024' THEN '33193'
+	WHEN Q1.rcl_cod = '10023' THEN '33195'
+	WHEN Q1.rcl_cod = '80649' THEN '33203'
+	WHEN Q1.rcl_cod IN ('EVOLE','060096') THEN '33268'
+	WHEN Q1.rcl_cod = '0013' THEN '33272'
+END AS CODMETA,
 
 CASE 
-	WHEN SUBSTR(q1.rcl_cod, 1, 10) = 'SC' THEN '33269'
-	WHEN SUBSTR(q1.rcl_cod, 1, 10) = '10025' THEN '33196'
-	WHEN SUBSTR(q1.rcl_cod, 1, 10) = '10024' THEN '33193'
-	WHEN SUBSTR(q1.rcl_cod, 1, 10) = '10023' THEN '33195'
-	WHEN SUBSTR(q1.rcl_cod, 1, 10) = '10026' THEN '33197'
-	WHEN SUBSTR(q1.rcl_cod, 1, 10) = '060045' THEN '33195'
-	WHEN SUBSTR(q1.rcl_cod, 1, 10) = 'EVOLE' THEN '33268'
-	WHEN SUBSTR(q1.rcl_cod, 1, 10) = '060096' THEN '33268'
-	WHEN SUBSTR(q1.rcl_cod, 1, 10) = '0013' THEN '33272'
-	ELSE NULL
-END CODMETA,
-
-q2.TipoUrgenciaID,
-
-SUBSTR(q1.rcl_cod, 1, 15) AS EspecialidadeCod,
-
- CASE 
-	WHEN SUBSTR(q1.rcl_cod, 1, 10) = 'SC' THEN 'SERVICO SOCIAL'
-	WHEN SUBSTR(q1.rcl_cod, 1, 10) = '10025' THEN 'ORTOPEDIA'
-	WHEN SUBSTR(q1.rcl_cod, 1, 10) = '10024' THEN 'PEDIATRIA'
-	WHEN SUBSTR(q1.rcl_cod, 1, 10) = '10023' THEN 'CLINICA GERAL'
-	WHEN SUBSTR(q1.rcl_cod, 1, 10) = '10026' THEN 'OFTALMOLOGIA'
-	WHEN SUBSTR(q1.rcl_cod, 1, 10) = '060045' THEN 'CLINICA MEDICA N'
-	WHEN SUBSTR(q1.rcl_cod, 1, 10) = 'EVOLE' THEN 'ENFERMAGEM E'
-	WHEN SUBSTR(q1.rcl_cod, 1, 10) = '060096' THEN 'ENFERMAGEM'
-	WHEN SUBSTR(q1.rcl_cod, 1, 10) = '0013' THEN 'FISIOTERAPIA'
-	ELSE NULL
-END ESPECIALIDADEDESCRICAO,
+	WHEN q2.TipoUrgenciaID IS NOT NULL THEN q2.TipoUrgenciaID
+	ELSE '5'
+END AS TipoUrgenciaID,
+CASE 
+	WHEN  q1.rcl_cod = 'SC' THEN '32011'
+	WHEN  q1.rcl_cod IS NOT NULL THEN  q1.rcl_cod 
+END AS ESPECAIDADECOD,
  
-
-'1'OrigemPaciente
+ CASE 
+	WHEN Q1.rcl_cod = 'SC' THEN 'SERVICO SOCIAL'
+	WHEN Q1.rcl_cod = '10025' THEN 'ORTOPEDIA'
+	WHEN Q1.rcl_cod = '10024' THEN 'PEDIATRIA'
+	WHEN Q1.rcl_cod = '10023' THEN 'CLINICA GERAL'
+	WHEN Q1.rcl_cod = '80649' THEN 'ODONTOLOGIA'
+	WHEN Q1.rcl_cod IN ('EVOLE','060096') THEN 'ENFERMAGEM'
+	WHEN Q1.rcl_cod = '0013' THEN 'FISIOTERAPIA'
+END AS ESPECIALIDADEDESCRICAO,
+'1' AS OrigemPaciente,
+Q1.osm_cid_cod AS CID
 
 
 FROM 
-(SELECT r1.rcl_dthr, r1.rcl_pac, r1.rcl_cod, r1.rcl_hsp, r1.rcl_dthr_lib 
-FROM rcl r1 
-WHERE r1.rcl_dthr >= :DATA_INICIAL 
-AND r1.rcl_dthr <= :DATA_FINAL
-AND r1.rcl_cod in ('EVOLE','10023','10024','10025','10026','060045','SC','0013', '060096')
-AND R1.rcl_stat NOT IN  ('C', 'A')
-AND R1.RCL_PAC NOT IN ('1','167086','35656','87207','78041','170034')
-) q1
+(SELECT DISTINCT r1.rcl_dthr, r1.rcl_pac, r1.rcl_cod, r1.rcl_hsp, r1.rcl_dthr_lib,o1.osm_cid_cod
+FROM rcl r1,osm o1
+WHERE r1.rcl_dthr >= :data_inicial
+AND r1.rcl_dthr <= :data_final 
+AND r1.rcl_cod in ('10023','10024','10025','80649','SC','0013', '060096')
+AND R1.rcl_stat = 'L'
+AND r1.RCL_OSM= o1.osm_num
+and r1.RCL_OSM_SERIE = o1.osm_serie) q1
 
-LEFT JOIN 
-(SELECT r2.rcl_dthr, r2.rcl_pac, r2.rcl_cod, r2.rcl_dthr_lib, r2.rcl_usr_login, 
+INNER  JOIN 
+(SELECT DISTINCT r2.rcl_dthr, r2.rcl_pac, r2.rcl_cod, r2.rcl_dthr_lib, r2.rcl_usr_login, 
 Case
-WHEN SUBSTR(f_resultado_rcl(r2.rcl_txt, '1349', '11') , 1, 25) = 'AMARELO' THEN '6'
-WHEN SUBSTR(f_resultado_rcl(r2.rcl_txt, '1349', '11') , 1, 25) = 'ROXO' THEN '6'
-WHEN SUBSTR(f_resultado_rcl(r2.rcl_txt, '1349', '11') , 1, 25) = 'AZUL' THEN '3'
-WHEN SUBSTR(f_resultado_rcl(r2.rcl_txt, '1349', '11') , 1, 25) = 'VERDE' THEN '4'
-WHEN SUBSTR(f_resultado_rcl(r2.rcl_txt, '1349', '11') , 1, 25) = 'VERMELHO' THEN '2'
+WHEN SUBSTR(f_resultado_rcl(r2.rcl_txt, '502', '11') , 1, 25) = 'AMARELO' THEN '6'
+WHEN SUBSTR(f_resultado_rcl(r2.rcl_txt, '502', '11') , 1, 25) = 'AZUL' THEN '3'
+WHEN SUBSTR(f_resultado_rcl(r2.rcl_txt, '502', '11') , 1, 25) = 'VERDE' THEN '4'
+WHEN SUBSTR(f_resultado_rcl(r2.rcl_txt, '502', '11') , 1, 25) = 'VERMELHO' THEN '2'
 ELSE '' 
 END AS TipoUrgenciaID
 FROM rcl r2 
-WHERE r2.rcl_dthr >= :DATA_INICIAL 
-AND r2.rcl_dthr <= :DATA_FINAL
+WHERE r2.rcl_dthr >= :data_inicial
+AND r2.rcl_dthr <= :data_final
 AND r2.rcl_cod = '060096' 
-AND r2.rcl_stat NOT IN  ('C', 'A') 
-AND R2.RCL_PAC NOT IN ('1','167086','35656','87207','78041','170034')
-) q2
+AND r2.rcl_stat = 'L') q2
 ON (q1.rcl_pac = q2.rcl_pac)
 
+
 LEFT JOIN 
-(SELECT  r3.rcl_pac, 
-substr(f_resultado_rcl(r3.RCL_TXT , '1110', '2'), 1, 17) AS dt_transfrencia, 
-substr(f_resultado_rcl(r3.RCL_TXT , '1110', '1'), 1, 17) AS dt_solicit_transf,
-substr(f_resultado_rcl(r3.RCL_TXT , '573', '1'), 1, 30 )AS DESTINO
---SUBSTR(f_resultado_rcl(r3.rcl_txt, '1110', '12') , 1, 25) AS CANCELA_TRANSF
+(SELECT DISTINCT  r3.rcl_pac, 
+f_resultado_rcl(r3.RCL_TXT , '1110', '2') AS dt_transfrencia, 
+f_resultado_rcl(r3.RCL_TXT , '1110', '1') AS dt_solicit_transf,
+f_resultado_rcl(r3.RCL_TXT , '573', '1') AS DESTINO
 FROM rcl r3 
-WHERE r3.rcl_dthr >= :DATA_INICIAL 
-AND r3.rcl_dthr <= :DATA_FINAL
+WHERE r3.rcl_dthr >= :data_inicial
+AND r3.rcl_dthr <= :data_final
 AND r3.rcl_cod = 'TRANFENF'
-AND r3.rcl_stat NOT IN  ('C', 'A')
-AND R3.RCL_PAC NOT IN ('1','167086','35656','87207','78041','170034')
-AND substr(f_resultado_rcl(r3.RCL_TXT , '1110', '12'),1,3 ) != 'SIM' ) q3
+--AND r3.rcl_cod in ('10023','10024','10025','80649','SC','0013', '060096')
+AND r3.rcl_stat != 'C') q3
 ON (q1.rcl_pac = q3.rcl_pac)
 
 LEFT JOIN 
-(SELECT r4.rcl_dthr, r4.rcl_pac, r4.rcl_cod, r4.rcl_dthr_lib, r4.rcl_stat,
+(SELECT DISTINCT r4.rcl_dthr, r4.rcl_pac, r4.rcl_cod, r4.rcl_dthr_lib,
 SUBSTR(f_resultado_rcl(r4.rcl_txt, '1157', '2' ) , 1, 25) AS data_OBITO,
 SUBSTR(f_resultado_rcl(r4.rcl_txt, '1157', '1' ) , 1, 25) AS Causa_Obito
 FROM rcl r4 
-WHERE r4.rcl_dthr >= :DATA_INICIAL 
-AND r4.rcl_dthr <= :DATA_FINAL
+WHERE r4.rcl_dthr >= :data_inicial 
+AND r4.rcl_dthr <= :data_final
 AND r4.rcl_cod = 'REGOBITO'
-AND R4.RCL_PAC NOT IN ('1','167086','35656','87207','78041','170034')
-AND r4.rcl_stat NOT IN  ('C', 'A') ) q4
+--AND r4.rcl_cod in ('10023','10024','10025','80649','SC','0013','060096')
+AND r4.rcl_stat != 'C') q4
 ON (q1.rcl_pac = q4.rcl_pac)
 
-LEFT JOIN 
-(SELECT p1.pac_reg, p1.pac_nome, p1.pac_nome_mae, p1.pac_nasc, p1.PAC_NUMCPF, p1.pac_pront, p1.pac_cep, p1.pac_comp, 
+INNER  JOIN 
+(SELECT DISTINCT  p1.pac_reg, p1.pac_nome, p1.pac_nome_mae, p1.pac_nasc, p1.PAC_NUMCPF, p1.pac_pront, p1.pac_cep, p1.pac_comp, 
 p1.pac_cid,p1.pac_uf, p2.PDC_COR,p1.pac_cartao_sus
 FROM pac p1
 INNER JOIN PDC p2 ON p1.pac_reg = p2.PDC_PAC_REG) q5
 ON (q1.rcl_pac = q5.pac_reg)
 
-LEFT JOIN
-(SELECT DISTINCT  F6.fle_dthr_chegada, F6.fle_pac_reg, R6.RCL_PAC, F6.fle_dthr_atendimento , R6.rcl_dthr, F6.fle_usr_atendimento, R6.rcl_usr_login, F6.fle_dthr_final
-FROM  FLE F6
-INNER JOIN RCL R6 ON date(R6.rcl_dthr) = date(F6.fle_dthr_atendimento) 
-and R6.rcl_pac = f6.fle_pac_reg 
-and F6.fle_usr_atendimento = R6.rcl_usr_login
-WHERE R6.RCL_PAC = F6.FLE_PAC_REG 
-AND F6.fle_dthr_chegada >= :DATA_INICIAL 
-AND F6.fle_dthr_chegada <= :DATA_FINAL
-) q6
-ON (q1.rcl_pac = q6.fle_pac_reg  AND q2.rcl_usr_login = q6.fle_usr_atendimento AND date(q1.rcl_dthr)  = date(q6.fle_dthr_chegada)  )
---ORDER BY DT_ENTRADA
+INNER  JOIN
+(SELECT DISTINCT  f6.fle_pac_reg, f6.fle_dthr_atendimento, u6.usr_nome, p6.psv_nome,  
+p6.psv_nome, c6.cfg_emp,  f6.fle_dthr_chegada,f6.fle_usr_atendimento
+	from fle F6, psv P6, usr U6,cfg c6, rcl r6 
+	where   r6.rcl_pac = f6.fle_pac_reg and
+	        f6.fle_psv_cod = p6.psv_cod and 
+			f6.fle_usr_atendimento = u6.usr_login and 
+			f6.fle_dthr_atendimento >= :data_inicial and
+			f6.fle_dthr_atendimento <= :data_final and 
+			f6.fle_dthr_atendimento <> f6.fle_dthr_chegada and
+			r6.rcl_dthr_lib > f6.fle_dthr_atendimento 
+			--r6.RCL_PAC = '805706'
+			
+)q6
+ON (q1.rcl_pac = q6.fle_pac_reg 
+AND q2.rcl_usr_login = q6.fle_usr_atendimento
+AND q1.rcl_dthr_lib > q6.fle_dthr_atendimento)
+
+
+)WHERE dt_atend > dt_entr_cls
+  AND dt_atend > dt_saida_cls 
+  AND SUBSTR(dt_entrada,1,10) = SUBSTR (dt_saida,1,10)  
+  --AND PRONTUARIO = '812583'-- IN ('813870','780426','68744','813410','131913','106197','43109','501757','111187')
+  
+ORDER BY PRONTUARIO, NUM_ATEND,DT_ENTRADA,DT_ENTR_CLS,DT_SAIDA_CLS,DT_ATEND,DT_SAIDA
